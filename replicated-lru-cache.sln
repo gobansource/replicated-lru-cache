@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{49B09B6C-FEC2-44E5-9789-45F17F0CE7D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GobanSource.ReplicatedLruCache", "src\GobanSource.ReplicatedLruCache\GobanSource.ReplicatedLruCache.csproj", "{7A1AA5B0-6D1D-434B-BF5E-53FCEF496646}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GobanSource.ReplicatedLruCache.Tests", "src\GobanSource.ReplicatedLruCache.Tests\GobanSource.ReplicatedLruCache.Tests.csproj", "{FC002F0D-87C8-459F-9679-85336BA0B81B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7A1AA5B0-6D1D-434B-BF5E-53FCEF496646}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A1AA5B0-6D1D-434B-BF5E-53FCEF496646}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A1AA5B0-6D1D-434B-BF5E-53FCEF496646}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A1AA5B0-6D1D-434B-BF5E-53FCEF496646}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC002F0D-87C8-459F-9679-85336BA0B81B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC002F0D-87C8-459F-9679-85336BA0B81B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC002F0D-87C8-459F-9679-85336BA0B81B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC002F0D-87C8-459F-9679-85336BA0B81B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7A1AA5B0-6D1D-434B-BF5E-53FCEF496646} = {49B09B6C-FEC2-44E5-9789-45F17F0CE7D8}
+		{FC002F0D-87C8-459F-9679-85336BA0B81B} = {49B09B6C-FEC2-44E5-9789-45F17F0CE7D8}
+	EndGlobalSection
+EndGlobal
