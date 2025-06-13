@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GobanSource.ReplicatedLruCa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GobanSource.ReplicatedLruCache.Tests", "src\GobanSource.ReplicatedLruCache.Tests\GobanSource.ReplicatedLruCache.Tests.csproj", "{FC002F0D-87C8-459F-9679-85336BA0B81B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GobanSource.ReplicatedLruCache.Example", "src\GobanSource.ReplicatedLruCache.Example\GobanSource.ReplicatedLruCache.Example.csproj", "{925F1734-812B-4D5E-8A8D-91A302439F44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +28,14 @@ Global
 		{FC002F0D-87C8-459F-9679-85336BA0B81B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC002F0D-87C8-459F-9679-85336BA0B81B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC002F0D-87C8-459F-9679-85336BA0B81B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{925F1734-812B-4D5E-8A8D-91A302439F44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{925F1734-812B-4D5E-8A8D-91A302439F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{925F1734-812B-4D5E-8A8D-91A302439F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{925F1734-812B-4D5E-8A8D-91A302439F44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7A1AA5B0-6D1D-434B-BF5E-53FCEF496646} = {49B09B6C-FEC2-44E5-9789-45F17F0CE7D8}
 		{FC002F0D-87C8-459F-9679-85336BA0B81B} = {49B09B6C-FEC2-44E5-9789-45F17F0CE7D8}
+		{925F1734-812B-4D5E-8A8D-91A302439F44} = {49B09B6C-FEC2-44E5-9789-45F17F0CE7D8}
 	EndGlobalSection
 EndGlobal
