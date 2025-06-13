@@ -1,35 +1,35 @@
-using Castle.DynamicProxy;
-using GobanSource.Bus.Redis;
 
+using GobanSource.Bus.Redis;
+using System.Reflection;
 
 namespace GobanSource.ReplicatedLruCache;
 
 public class ReplicatedLruCacheFactory : IReplicatedLruCacheFactory
 {
-    private readonly ProxyGenerator _proxyGenerator = new();
 
     public T Create<T>(string instanceId, ILruCache lruCache, IRedisSyncBus<CacheMessage> syncBus) where T : class, IReplicatedLruCache
     {
 
         var cache = new ReplicatedLruCache(lruCache, syncBus, instanceId);
 
-        return _proxyGenerator.CreateInterfaceProxyWithoutTarget<T>(
-            new CacheInterceptor(cache)
-        );
+        return ReplicatedLruCacheProxy<T>.Create(cache);
     }
 }
 
-public class CacheInterceptor : IInterceptor
+public class ReplicatedLruCacheProxy<T> : DispatchProxy
+    where T : class, IReplicatedLruCache
 {
-    private readonly ReplicatedLruCache _lruCache;
+    private ReplicatedLruCache _cache;
 
-    public CacheInterceptor(ReplicatedLruCache lruCache)
+    public static T Create(ReplicatedLruCache cache)
     {
-        _lruCache = lruCache;
+        var proxy = Create<T, ReplicatedLruCacheProxy<T>>() as ReplicatedLruCacheProxy<T>;
+        proxy._cache = cache;
+        return proxy as T;
     }
 
-    public void Intercept(IInvocation invocation)
+    protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
     {
-        invocation.ReturnValue = invocation.Method.Invoke(_lruCache, invocation.Arguments);
+        return targetMethod?.Invoke(_cache, args);
     }
 }

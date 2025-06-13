@@ -27,10 +27,10 @@
   <ItemGroup>
     <PackageReference Include="GobanSource.Bus.Redis" Version="0.1.2.29" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
-    <PackageReference Include="Castle.Core" Version="5.1.1" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
-    <None Include="../../README.md" Pack="true" PackagePath="/"/>
-    <None Include="../../icon.png" Pack="true" PackagePath="/"/>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../icon.png" Pack="true" PackagePath="/" />
+    <PackageReference Include="System.Reflection.DispatchProxy" Version="4.8.2" />
   </ItemGroup>
 
 </Project>
