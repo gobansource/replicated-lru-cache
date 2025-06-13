@@ -1,0 +1,164 @@
+name: build
+
+# RELEASE CYCLE DOCUMENTATION
+# ------------------------------------------------------------------------------------------
+# This workflow manages the build, test, and release cycle as follows:
+#
+# 1. AUTOMATIC PRE-RELEASE (on push to main):
+#    - Builds and tests the code
+#    - Updates version.txt using bump-version.sh
+#    - Tags the commit with v{version}-alpha
+#    - No NuGet package is published
+#
+# 2. MANUAL RELEASE (on tag creation):
+#    - When you manually create and push a tag following the patterns:
+#      a. v{version} (e.g., v1.2.3) - Creates a production release
+#      b. v{version}-{suffix} (e.g., v1.2.3-beta) - Creates a pre-release
+#    - The workflow extracts the version and suffix
+#    - Updates version.txt with the base version
+#    - Builds and tests the code
+#    - Publishes the NuGet package to nuget.org
+#    - Suffix appears in the package version as expected
+# ------------------------------------------------------------------------------------------
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
+      - "!v*-alpha"
+  pull_request:
+    branches: [main]
+
+env:
+  PROJECT_PATH: src/GobanSource.ReplicatedLruCache/
+  PROJECT_FILE: GobanSource.ReplicatedLruCache.csproj
+  SOLUTION_FILE: GobanSource.ReplicatedLruCache.sln
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.0
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0" # specify your .NET Core version
+
+      - name: prepare variables for release
+        if: ${{ startsWith(github.ref,'refs/tags/v') }}
+        run: |
+          # Extract version from tag (remove 'refs/tags/v' prefix)
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Extracted version: $TAG_VERSION"
+
+          # Check if tag has a suffix like -beta or -pre1
+          if [[ "$TAG_VERSION" == *-* ]]; then
+            # Split version at hyphen
+            BASE_VERSION=${TAG_VERSION%%-*}
+            VERSION_SUFFIX=${TAG_VERSION##*-}
+            echo "Base version: $BASE_VERSION, Suffix: $VERSION_SUFFIX"
+            
+            # Set the suffix to VERSION_SUFFIX
+            echo "VERSION_SUFFIX=$VERSION_SUFFIX" >> $GITHUB_ENV
+            # Update version.txt with the base version
+            echo $BASE_VERSION > version.txt
+          else
+            # No suffix, standard release
+            echo "VERSION_SUFFIX=" >> $GITHUB_ENV
+            # Update version.txt with full version
+            echo $TAG_VERSION > version.txt
+          fi
+
+          echo "PackConfiguration=Release" >> $GITHUB_ENV
+
+      - name: prepare variables for pre-release
+        if: ${{ !startsWith(github.ref,'refs/tags/v') }}
+        run: |
+          ./bump-version.sh
+          echo "VERSION_SUFFIX=alpha" >> $GITHUB_ENV
+          echo "PackConfiguration=Debug" >> $GITHUB_ENV
+
+      - name: update version
+        run: |
+          echo $VERSION_SUFFIX
+          sed -i "s/<\/VersionSuffix/$VERSION_SUFFIX<\/VersionSuffix/" $PROJECT_PATH$PROJECT_FILE
+
+      - name: restore dependencies
+        run: dotnet restore
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: build
+        run: dotnet build --no-restore
+
+      - name: test
+        run: |
+          dotnet list . package
+          dotnet test -v n --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=lcov.info
+          ~/.dotnet/tools/reportgenerator "-reports:src/*/TestResults/*/coverage.cobertura.xml" "-reporttypes:Html;JsonSummary;TextSummary;Cobertura" "-targetdir:coverage"
+
+      - name: pack
+        run: |
+          echo $PackConfiguration
+          dotnet pack -c $PackConfiguration $PROJECT_PATH$PROJECT_FILE
+
+      - name: publish to nuget
+        if: ${{ startsWith(github.ref,'refs/tags/v') }}
+        env:
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}
+          MYGET_KEY: ${{ secrets.MYGET_KEY }}
+        run: |
+          dotnet nuget push ${PROJECT_PATH}bin/$PackConfiguration/*.nupkg -k $NUGET_KEY -s https://api.nuget.org/v3/index.json
+          dotnet nuget push ${PROJECT_PATH}bin/$PackConfiguration/*.nupkg -k $MYGET_KEY -s https://www.myget.org/F/gobansource/api/v3/index.json
+
+      - name: checkout code-coverage site
+        uses: actions/checkout@v4.2.0
+        with:
+          repository: gobansource/code-coverage
+          ref: main
+          path: pages
+          token: ${{ secrets.PAT_CODE_COVERAGE }}
+
+      - name: upload codecoverage
+        run: |
+          mkdir -p pages/$GITHUB_REPOSITORY/$GITHUB_RUN_NUMBER
+          cp -r coverage/* pages/$GITHUB_REPOSITORY/$GITHUB_RUN_NUMBER
+          cd pages
+          C_RAGE=`grep 'Line coverage' ../coverage/Summary.txt| sed -r 's/Line coverage: (.*)/\1/'`
+          echo "{\"schemaVersion\": 1,\"label\": \"coverage\",\"message\": \"$C_RAGE\",\"color\": \"orange\"}" > $GITHUB_REPOSITORY/badge.txt
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "codecoverage for $GITHUB_REPOSITORY #$GITHUB_RUN_NUMBER"
+          git push
+
+  apply-tag:
+    name: Apply tag
+    needs: build
+    runs-on: ubuntu-latest
+    #only run on main branch
+    if: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Bump version
+        run: |
+          ./bump-version.sh
+      - name: Tag
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          branch_name=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
+          git tag v$(cat version.txt)-alpha
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: ${{ github.ref }}
+          tags: true

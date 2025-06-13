@@ -1,18 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net8.0;net9.0</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>GobanSource.ReplicatedLruCache</AssemblyName>
     <Nullable>enable</Nullable>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageId>GobanSource.ReplicatedLruCache</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <VersionPrefix>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../../version.txt').Trim())</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+    <SourceRevisionId>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId>
+    <Authors>GobanSource</Authors>
+    <Description>A lightweight, replicated LRU cache library for .NET applications. replicated by redis pub/sub.</Description>
+    <PackageTags>redis;lru;cache;distributed;replicated;fan-out;gobansource</PackageTags>
+    <PackageProjectUrl>https://github.com/gobansource/replicated-lru-cache</PackageProjectUrl>
+    <Copyright>Copyright © 2025 Goban Source, LLC</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Company>Goban Source, LLC</Company>
+    <RepositoryUrl>https://github.com/gobansource/replicated-lru-cache</RepositoryUrl>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GobanSource.Bus.Redis" Version="0.1.2.26" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.6" />
+    <PackageReference Include="GobanSource.Bus.Redis" Version="0.1.2.29" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
     <PackageReference Include="Castle.Core" Version="5.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
   </ItemGroup>
 
 </Project>
