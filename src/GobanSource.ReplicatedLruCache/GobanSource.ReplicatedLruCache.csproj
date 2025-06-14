@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net8.0;net9.0</TargetFrameworks>
     <LangVersion>10.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>GobanSource.ReplicatedLruCache</AssemblyName>
@@ -25,9 +25,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GobanSource.Bus.Redis" Version="0.1.2.29" />
+    <PackageReference Include="GobanSource.Bus.Redis" Version="1.0.38" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <None Include="../../README.md" Pack="true" PackagePath="/" />
     <None Include="../../icon.png" Pack="true" PackagePath="/" />
     <PackageReference Include="System.Reflection.DispatchProxy" Version="4.8.2" />
