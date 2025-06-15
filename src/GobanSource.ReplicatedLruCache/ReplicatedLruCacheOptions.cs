@@ -1,9 +1,10 @@
-
+using System;
 namespace GobanSource.ReplicatedLruCache;
 
 public class RedisSyncBusOptions
 {
-    public string ConnectionString { get; set; } = null!;
+    [Obsolete("ConnectionString is ignored. Provide IConnectionMultiplexer instead.")]
+    public string? ConnectionString { get; set; }
     public string ChannelPrefix { get; set; } = null!;
 }
 

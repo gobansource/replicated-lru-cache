@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 class Program
 {
@@ -26,14 +27,17 @@ class Program
         Host.CreateDefaultBuilder()
             .ConfigureServices((hostContext, services) =>
             {
-                // Configure using the proper extension method
+                // Create and register the shared Redis connection
+                var redis = ConnectionMultiplexer.Connect("localhost:6379");
+                services.AddSingleton<IConnectionMultiplexer>(redis);
+
                 services.AddReplicatedLruCache<IReplicatedLruCache>(
                     maxSize: 1000,
                     cacheInstanceId: instanceId,
+                    connectionMultiplexer: redis,
                     configureOptions: options =>
                     {
                         options.AppId = "demo-app";
-                        options.RedisSyncBus.ConnectionString = "localhost:6379";
                         options.RedisSyncBus.ChannelPrefix = "cache-sync";
                     });
 

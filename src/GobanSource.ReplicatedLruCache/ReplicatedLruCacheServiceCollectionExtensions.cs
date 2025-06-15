@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using System.Linq;
 namespace GobanSource.ReplicatedLruCache;
 
 public static class ReplicatedLruCacheServiceCollectionExtensions
@@ -24,7 +25,8 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
         this IServiceCollection services,
         int maxSize,
         string? cacheInstanceId = null,
-        Action<ReplicatedLruCacheOptions>? configureOptions = null)
+        Action<ReplicatedLruCacheOptions>? configureOptions = null,
+        IConnectionMultiplexer? connectionMultiplexer = null)
         where TInterface : class, IReplicatedLruCache
     {
         if (maxSize <= 0)
@@ -38,7 +40,7 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
             .Configure(options => configureOptions?.Invoke(options));
 
         services.EnsureReplicatedCacheFactory();
-        services.EnsureReplicatedCacheInfra();
+        services.EnsureReplicatedCacheInfra(connectionMultiplexer, configureOptions);
 
         services.AddKeyedSingleton<ILruCache>(
             actualCacheId, (sp, key)
@@ -62,21 +64,19 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
 
     private static IServiceCollection AddRedisSyncBus(
         this IServiceCollection services,
+        IConnectionMultiplexer? externalMultiplexer = null,
         Action<ReplicatedLruCacheOptions>? configureOptions = null)
     {
         services.AddOptions<ReplicatedLruCacheOptions>()
             .BindConfiguration("ReplicatedLruCache")
             .Configure(options => configureOptions?.Invoke(options));
 
-        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        // Ensure we have a multiplexer: either supplied directly or already registered in DI
+        var hasMultiplexerInDi = services.Any(x => x.ServiceType == typeof(IConnectionMultiplexer));
+        if (!hasMultiplexerInDi && externalMultiplexer == null)
         {
-            var options = sp.GetRequiredService<IOptions<ReplicatedLruCacheOptions>>().Value;
-            if (string.IsNullOrEmpty(options.RedisSyncBus.ConnectionString))
-            {
-                throw new ArgumentException("RedisSyncBus.ConnectionString must be configured in ReplicatedLruCacheOptions", nameof(configureOptions));
-            }
-            return ConnectionMultiplexer.Connect(options.RedisSyncBus.ConnectionString);
-        });
+            throw new InvalidOperationException("IConnectionMultiplexer must be registered in the service collection or supplied to AddReplicatedLruCache");
+        }
 
         services.AddSingleton<IRedisSyncBus<CacheMessage>>(sp =>
         {
@@ -85,7 +85,7 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
             {
                 throw new ArgumentException("AppId must be configured in ReplicatedLruCacheOptions", nameof(configureOptions));
             }
-            var redis = sp.GetRequiredService<IConnectionMultiplexer>();
+            var redis = externalMultiplexer ?? sp.GetRequiredService<IConnectionMultiplexer>();
 
             return new RedisSyncBus<CacheMessage>(
                 redis,
@@ -100,14 +100,15 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
 
     private static IServiceCollection EnsureReplicatedCacheInfra(
         this IServiceCollection services,
+        IConnectionMultiplexer? connectionMultiplexer = null,
         Action<ReplicatedLruCacheOptions>? configureOptions = null)
     {
-        if (services.All(x => x.ServiceType == typeof(IRedisSyncBus<CacheMessage>)))
+        if (services.Any(x => x.ServiceType == typeof(IRedisSyncBus<CacheMessage>)))
         {
             return services;
         }
 
-        services.AddRedisSyncBus(configureOptions);
+        services.AddRedisSyncBus(connectionMultiplexer, configureOptions);
 
         // Register the message handler for cache messages
         services.AddSingleton<IMessageHandler<CacheMessage>, CacheMessageHandler>();
