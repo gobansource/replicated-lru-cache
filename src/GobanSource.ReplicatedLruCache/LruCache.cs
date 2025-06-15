@@ -79,8 +79,7 @@ public class LruCache : ILruCache
         _instanceId = instanceId ?? Guid.NewGuid().ToString();
         _cache = new MemoryCache(new MemoryCacheOptions
         {
-            // Only using MemoryCache for TTL expiration, size management is handled by LRU
-            ExpirationScanFrequency = TimeSpan.FromMinutes(5)
+            // ExpirationScanFrequency defaults to 1 minute
         });
     }
 
