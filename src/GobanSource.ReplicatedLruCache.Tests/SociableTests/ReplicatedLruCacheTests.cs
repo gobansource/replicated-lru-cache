@@ -19,7 +19,7 @@ public class ReplicatedLruCacheTests
     private IRedisSyncBus<CacheMessage> _syncBus2 = null!;
     private IRedisSyncBus<CacheMessage> _syncBus3 = null!;
     private string _appId = null!;
-    private const string CacheInstanceId = "test-cache";
+    private const string CacheName = "test-cache";
     private const int CacheSize = 100;
 
     [TestInitialize]
@@ -30,15 +30,15 @@ public class ReplicatedLruCacheTests
 
         // Create first instance
         var (service1, serviceProvider1, cache1, syncBus1) =
-            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, CacheInstanceId, CacheSize);
+            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, CacheName, CacheSize);
 
         // Create second instance
         var (service2, serviceProvider2, cache2, syncBus2) =
-            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, CacheInstanceId, CacheSize);
+            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, CacheName, CacheSize);
 
         // Create third instance
         var (service3, serviceProvider3, cache3, syncBus3) =
-            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, CacheInstanceId, CacheSize);
+            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, CacheName, CacheSize);
 
         _service1 = service1;
         _service2 = service2;
@@ -50,12 +50,11 @@ public class ReplicatedLruCacheTests
         _syncBus2 = syncBus2;
         _syncBus3 = syncBus3;
 
-        // Create replicated caches
+        // Create replicated caches (proxy over concrete implementation)
         Console.WriteLine("[TEST] Creating replicated caches");
-        ReplicatedLruCacheFactory factory = new ReplicatedLruCacheFactory();
-        _replicatedLruCache1 = factory.Create<IReplicatedLruCache>(CacheInstanceId, cache1, syncBus1);
-        _replicatedLruCache2 = factory.Create<IReplicatedLruCache>(CacheInstanceId, cache2, syncBus2);
-        _replicatedLruCache3 = factory.Create<IReplicatedLruCache>(CacheInstanceId, cache3, syncBus3);
+        _replicatedLruCache1 = ReplicatedLruCacheProxy<IReplicatedLruCache>.Create(new ReplicatedLruCache(cache1, syncBus1, CacheName));
+        _replicatedLruCache2 = ReplicatedLruCacheProxy<IReplicatedLruCache>.Create(new ReplicatedLruCache(cache2, syncBus2, CacheName));
+        _replicatedLruCache3 = ReplicatedLruCacheProxy<IReplicatedLruCache>.Create(new ReplicatedLruCache(cache3, syncBus3, CacheName));
 
         // Start all services
         Console.WriteLine("[TEST] Starting services");

@@ -12,13 +12,13 @@ public class CacheMetrics
 
     public static string MeterName => Meter.Name;
 
-    public void RecordHit(string cacheInstanceId)
+    public void RecordHit(string cacheName)
     {
-        _cacheHits.Add(1, new KeyValuePair<string, object?>("cache_instance", cacheInstanceId));
+        _cacheHits.Add(1, new KeyValuePair<string, object?>("cache_instance", cacheName));
     }
 
-    public void RecordMiss(string cacheInstanceId)
+    public void RecordMiss(string cacheName)
     {
-        _cacheMisses.Add(1, new KeyValuePair<string, object?>("cache_instance", cacheInstanceId));
+        _cacheMisses.Add(1, new KeyValuePair<string, object?>("cache_instance", cacheName));
     }
 }

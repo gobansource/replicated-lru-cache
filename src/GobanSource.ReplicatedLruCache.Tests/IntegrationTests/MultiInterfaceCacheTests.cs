@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using GobanSource.Bus.Redis;
+using StackExchange.Redis;
 
 namespace GobanSource.ReplicatedLruCache.Tests.IntegrationTests;
 
@@ -40,6 +41,8 @@ public class MultiInterfaceCacheTests
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
                 ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
+        var mux1 = ConnectionMultiplexer.Connect("localhost:6379");
+        services1.AddSingleton<IConnectionMultiplexer>(mux1);
         services1.AddReplicatedLruCache<ITestReplicatedLruCache1>(CacheSize);
         services1.AddReplicatedLruCache<ITestReplicatedLruCache2>(CacheSize);
 
@@ -59,6 +62,8 @@ public class MultiInterfaceCacheTests
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
                 ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
+        var mux2 = ConnectionMultiplexer.Connect("localhost:6379");
+        services2.AddSingleton<IConnectionMultiplexer>(mux2);
         services2.AddReplicatedLruCache<ITestReplicatedLruCache1>(CacheSize);
         services2.AddReplicatedLruCache<ITestReplicatedLruCache2>(CacheSize);
 
@@ -133,11 +138,12 @@ public class MultiInterfaceCacheTests
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
                 ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
+        var muxExplicit = ConnectionMultiplexer.Connect("localhost:6379");
+        services.AddSingleton<IConnectionMultiplexer>(muxExplicit);
 
         // Act - Register one cache with custom ID, one with default
         services.AddReplicatedLruCache<ITestReplicatedLruCache1>(CacheSize, customId);
         services.AddReplicatedLruCache<ITestReplicatedLruCache2>(CacheSize);
-
 
         var serviceProvider = services.BuildServiceProvider();
         var cache1 = serviceProvider.GetRequiredService<ITestReplicatedLruCache1>();

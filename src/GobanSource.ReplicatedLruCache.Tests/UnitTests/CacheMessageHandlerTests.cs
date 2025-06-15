@@ -8,7 +8,7 @@ namespace GobanSource.ReplicatedLruCache.Tests.UnitTests;
 [TestClass]
 public class CacheMessageHandlerTests
 {
-    private const string TestCacheInstanceId = "test-cache";
+    private const string TestCacheName = "test-cache";
     private IServiceProvider _serviceProvider = null!;
     private Mock<ILruCache> _mockCache = null!;
     private Mock<ILogger<CacheMessageHandler>> _mockLogger = null!;
@@ -23,7 +23,7 @@ public class CacheMessageHandlerTests
 
         // Create a real service collection and register our mock
         var services = new ServiceCollection();
-        services.AddKeyedSingleton<ILruCache>(TestCacheInstanceId, (sp, key) => _mockCache.Object);
+        services.AddKeyedSingleton<ILruCache>(TestCacheName, (sp, key) => _mockCache.Object);
 
         // Build a real service provider
         _serviceProvider = services.BuildServiceProvider();
@@ -38,7 +38,7 @@ public class CacheMessageHandlerTests
         // Arrange
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue",
@@ -65,7 +65,7 @@ public class CacheMessageHandlerTests
         // Arrange
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Remove,
             Key = "testKey"
         };
@@ -90,7 +90,7 @@ public class CacheMessageHandlerTests
         // Arrange
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Clear
         };
 
@@ -114,7 +114,7 @@ public class CacheMessageHandlerTests
         // Arrange
         var message = new CacheMessage
         {
-            CacheInstanceId = "non-existent-cache",
+            CacheName = "non-existent-cache",
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue"
@@ -142,7 +142,7 @@ public class CacheMessageHandlerTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue"

@@ -19,7 +19,7 @@ public class CacheSyncHostedServiceTests
     private IRedisSyncBus<CacheMessage> _syncBus2 = null!;
     private IRedisSyncBus<CacheMessage> _syncBus3 = null!;
     private string _appId = null!;
-    private const string TestCacheInstanceId = "test-cache";
+    private const string TestCacheName = "test-cache";
 
     [TestInitialize]
     public void Setup()
@@ -28,15 +28,15 @@ public class CacheSyncHostedServiceTests
 
         // Create first instance
         var (service1, serviceProvider1, cache1, syncBus1) =
-            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, TestCacheInstanceId);
+            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, TestCacheName);
 
         // Create second instance
         var (service2, serviceProvider2, cache2, syncBus2) =
-            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, TestCacheInstanceId);
+            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, TestCacheName);
 
         // Create third instance
         var (service3, serviceProvider3, cache3, syncBus3) =
-            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, TestCacheInstanceId);
+            CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, TestCacheName);
 
         _service1 = service1;
         _service2 = service2;
@@ -59,7 +59,7 @@ public class CacheSyncHostedServiceTests
         var testMessage = new CacheMessage
         {
             AppId = _appId,
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue",

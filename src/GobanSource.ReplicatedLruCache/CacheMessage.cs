@@ -12,7 +12,7 @@ public class CacheMessage : BaseMessage
     /// Identifies which cache instance this message belongs to.
     /// Multiple cache instances can exist within the same application.
     /// </summary>
-    public string CacheInstanceId { get; set; } = null!;
+    public string CacheName { get; set; } = null!;
 
     /// <summary>
     /// The type of cache operation being performed.

@@ -8,23 +8,10 @@ namespace GobanSource.ReplicatedLruCache;
 
 public static class ReplicatedLruCacheServiceCollectionExtensions
 {
-    private static IServiceCollection EnsureReplicatedCacheFactory(
-        this IServiceCollection services)
-    {
-
-
-        // Only add if not already registered
-        if (services.All(x => x.ServiceType != typeof(IReplicatedLruCacheFactory)))
-        {
-            services.AddSingleton<IReplicatedLruCacheFactory, ReplicatedLruCacheFactory>();
-        }
-        return services;
-    }
-
     public static IServiceCollection AddReplicatedLruCache<TInterface>(
         this IServiceCollection services,
         int maxSize,
-        string? cacheInstanceId = null,
+        string? cacheName = null,
         Action<ReplicatedLruCacheOptions>? configureOptions = null,
         IConnectionMultiplexer? connectionMultiplexer = null)
         where TInterface : class, IReplicatedLruCache
@@ -33,18 +20,17 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
             throw new ArgumentException("Cache size must be greater than zero", nameof(maxSize));
 
         // Use interface name if no ID provided
-        var actualCacheId = cacheInstanceId ?? typeof(TInterface).Name;
+        var actualCacheName = cacheName ?? typeof(TInterface).Name;
 
         services.AddOptions<ReplicatedLruCacheOptions>()
             .BindConfiguration("ReplicatedLruCache")
             .Configure(options => configureOptions?.Invoke(options));
 
-        services.EnsureReplicatedCacheFactory();
         services.EnsureReplicatedCacheInfra(connectionMultiplexer, configureOptions);
 
         services.AddKeyedSingleton<ILruCache>(
-            actualCacheId, (sp, key)
-                => new LruCache(maxSize, sp.GetRequiredService<ILogger<LruCache>>(), sp.GetService<CacheMetrics>(), actualCacheId));
+            actualCacheName, (sp, key)
+                => new LruCache(maxSize, sp.GetRequiredService<ILogger<LruCache>>(), sp.GetService<CacheMetrics>(), actualCacheName));
 
         services.AddSingleton<TInterface>(sp =>
         {
@@ -53,9 +39,11 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
             {
                 throw new ArgumentException("AppId must be configured in ReplicatedLruCacheOptions", nameof(configureOptions));
             }
-            var factory = sp.GetRequiredService<IReplicatedLruCacheFactory>();
-            return factory.Create<TInterface>(actualCacheId, sp.GetRequiredKeyedService<ILruCache>(actualCacheId),
-            sp.GetRequiredService<IRedisSyncBus<CacheMessage>>()
+            return ReplicatedLruCacheProxy<TInterface>.Create(
+                new ReplicatedLruCache(
+                    sp.GetRequiredKeyedService<ILruCache>(actualCacheName),
+                    sp.GetRequiredService<IRedisSyncBus<CacheMessage>>(),
+                    actualCacheName)
             );
         });
 

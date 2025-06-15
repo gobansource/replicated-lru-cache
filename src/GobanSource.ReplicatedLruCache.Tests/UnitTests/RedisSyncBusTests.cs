@@ -35,7 +35,7 @@ public class RedisSyncBusTests
         var message = new CacheMessage
         {
             AppId = _appId,
-            CacheInstanceId = "test-cache",
+            CacheName = "test-cache",
             Operation = CacheOperation.Set,
             Key = "test-key",
             Value = "test-value",
@@ -59,7 +59,7 @@ public class RedisSyncBusTests
     //     // Arrange
     //     var message = new CacheMessage
     //     {
-    //         CacheInstanceId = "test-cache",
+    //         CacheName = "test-cache",
     //         Operation = CacheOperation.Set,
     //         Key = "test-key",
     //         Value = "test-value"
@@ -161,7 +161,7 @@ public class RedisSyncBusTests
         var message = new CacheMessage
         {
             AppId = _appId,
-            CacheInstanceId = "test-cache",
+            CacheName = "test-cache",
             Operation = CacheOperation.Set,
             Key = "test-key",
             Value = "test-value",
@@ -199,7 +199,7 @@ public class RedisSyncBusTests
         var message = new CacheMessage
         {
             AppId = "different-app-id",
-            CacheInstanceId = "test-cache",
+            CacheName = "test-cache",
             Operation = CacheOperation.Set,
             Key = "test-key",
             Value = "test-value",
@@ -250,7 +250,7 @@ public class RedisSyncBusTests
         var message = new CacheMessage
         {
             AppId = _appId,
-            CacheInstanceId = "test-cache",
+            CacheName = "test-cache",
             Operation = CacheOperation.Set,
             Key = "test-key",
             Value = "test-value",

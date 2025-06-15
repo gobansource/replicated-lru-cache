@@ -8,7 +8,7 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
 {
     private IConnectionMultiplexer _redis = null!;
     private string _appId = null!;
-    private string _cacheInstanceId = null!;
+    private string _cacheName = null!;
     private string _channelPrefix = null!;
     private IRedisSyncBus<CacheMessage> _provider = null!;
 
@@ -16,7 +16,7 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
     public void Initialize()
     {
         _appId = $"test-app-{Guid.NewGuid()}";
-        _cacheInstanceId = $"test-cache-{Guid.NewGuid()}";
+        _cacheName = $"test-cache-{Guid.NewGuid()}";
         _channelPrefix = "test-cache-sync";
 
         _provider = CreateSyncBus(_appId, _channelPrefix);
@@ -43,7 +43,7 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
         var testMessage = new CacheMessage
         {
             AppId = _appId,
-            CacheInstanceId = _cacheInstanceId,
+            CacheName = _cacheName,
             Key = "test-key",
             Value = "test-value",
             Operation = CacheOperation.Set
@@ -97,7 +97,7 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
             var testMessage = new CacheMessage
             {
                 AppId = _appId,
-                CacheInstanceId = _cacheInstanceId,
+                CacheName = _cacheName,
                 Key = "test-key",
                 Value = "test-value",
                 Operation = CacheOperation.Set
@@ -187,7 +187,7 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
             var testMessage = new CacheMessage
             {
                 AppId = _appId,
-                CacheInstanceId = _cacheInstanceId,
+                CacheName = _cacheName,
                 Key = "test-key",
                 Value = "test-value",
                 Operation = CacheOperation.Set
@@ -234,7 +234,7 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
             var testMessage2 = new CacheMessage
             {
                 AppId = _appId,
-                CacheInstanceId = _cacheInstanceId,
+                CacheName = _cacheName,
                 Key = "test-key-2",
                 Value = "test-value-2",
                 Operation = CacheOperation.Set

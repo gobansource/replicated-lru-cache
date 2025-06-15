@@ -10,7 +10,7 @@ public static class CacheSyncHostedServiceFactory
     public static (MessageSyncHostedService<CacheMessage> service, IServiceProvider serviceProvider, Mock<ILruCache> mockCache, Mock<IRedisSyncBus<CacheMessage>> mockSyncBus, Mock<ILogger<MessageSyncHostedService<CacheMessage>>> mockLogger, Mock<ILogger<CacheMessageHandler>> mockHandlerLogger)
         CreateForUnitTest(
             string appId,
-            string cacheInstanceId)
+            string cacheName)
     {
         var services = new ServiceCollection();
 
@@ -21,7 +21,7 @@ public static class CacheSyncHostedServiceFactory
         var mockCacheMessageHandlerLogger = new Mock<ILogger<CacheMessageHandler>>();
 
         // Register services
-        services.AddKeyedSingleton<ILruCache>(cacheInstanceId, (sp, key) => mockCache.Object);
+        services.AddKeyedSingleton<ILruCache>(cacheName, (sp, key) => mockCache.Object);
         services.AddSingleton<IRedisSyncBus<CacheMessage>>(mockSyncBus.Object);
         services.AddSingleton(mockLogger.Object);
         services.AddSingleton<IMessageHandler<CacheMessage>>(sp => new CacheMessageHandler(sp, mockCacheMessageHandlerLogger.Object));
@@ -40,14 +40,14 @@ public static class CacheSyncHostedServiceFactory
     public static (MessageSyncHostedService<CacheMessage> service, IServiceProvider serviceProvider, ILruCache cache, IRedisSyncBus<CacheMessage> syncBus)
         CreateForSociableTest(
             string appId,
-            string cacheInstanceId,
+            string cacheName,
             int cacheSize = 1000)
     {
         var services = new ServiceCollection();
 
         // Set up cache
         var cache = new LruCache(cacheSize);
-        services.AddKeyedSingleton<ILruCache>(cacheInstanceId, cache);
+        services.AddKeyedSingleton<ILruCache>(cacheName, cache);
 
         // Set up sync bus
         var syncBus = RedisSyncBusFactory.CreateForTest(appId);

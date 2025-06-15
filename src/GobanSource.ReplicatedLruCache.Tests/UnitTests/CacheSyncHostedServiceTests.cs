@@ -14,14 +14,14 @@ public class CacheSyncHostedServiceTests
     private Mock<ILogger<MessageSyncHostedService<CacheMessage>>> _mockLogger = null!;
     private Mock<ILogger<CacheMessageHandler>> _mockHandlerLogger = null!;
     private string _appId = null!;
-    private const string TestCacheInstanceId = "test-cache";
+    private const string TestCacheName = "test-cache";
 
     [TestInitialize]
     public void Setup()
     {
         _appId = Guid.NewGuid().ToString();
         (_service, _, _mockCache, _mockSyncBus, _mockLogger, _mockHandlerLogger) =
-            CacheSyncHostedServiceFactory.CreateForUnitTest(_appId, TestCacheInstanceId);
+            CacheSyncHostedServiceFactory.CreateForUnitTest(_appId, TestCacheName);
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ public class CacheSyncHostedServiceTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue",
@@ -91,7 +91,7 @@ public class CacheSyncHostedServiceTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Remove,
             Key = "testKey"
         };
@@ -123,7 +123,7 @@ public class CacheSyncHostedServiceTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Clear
         };
 
@@ -157,7 +157,7 @@ public class CacheSyncHostedServiceTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = "non-existent-cache",
+            CacheName = "non-existent-cache",
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue"
@@ -177,7 +177,7 @@ public class CacheSyncHostedServiceTests
     }
 
     [TestMethod]
-    public async Task MessageHandler_WhenCacheInstanceIdDoesNotMatch_LogsWarning()
+    public async Task MessageHandler_WhenCacheNameDoesNotMatch_LogsWarning()
     {
         // Arrange
         Func<CacheMessage, Task> messageHandler = null!;
@@ -189,7 +189,7 @@ public class CacheSyncHostedServiceTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = "different-cache-instance",
+            CacheName = "different-cache-instance",
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue"
@@ -227,7 +227,7 @@ public class CacheSyncHostedServiceTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue"

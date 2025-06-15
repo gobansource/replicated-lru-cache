@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using GobanSource.Bus.Redis;
+using StackExchange.Redis;
 
 namespace GobanSource.ReplicatedLruCache.Tests.IntegrationTests;
 
@@ -23,7 +24,7 @@ public class ReplicatedLruCacheTests
     private IRedisSyncBus<CacheMessage> _syncBus2 = null!;
     private IRedisSyncBus<CacheMessage> _syncBus3 = null!;
     private string _appId = null!;
-    private const string CacheInstanceId = "test-cache";
+    private const string CacheName = "test-cache";
     private const int CacheSize = 10000;
     private string _channelPrefix = null!;
     [TestInitialize]
@@ -42,7 +43,9 @@ public class ReplicatedLruCacheTests
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
                 ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
-        services1.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheInstanceId);
+        var mux1 = ConnectionMultiplexer.Connect("localhost:6379");
+        services1.AddSingleton<IConnectionMultiplexer>(mux1);
+        services1.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName);
 
         _serviceProvider1 = services1.BuildServiceProvider();
         _service1 = _serviceProvider1.GetServices<IHostedService>().OfType<MessageSyncHostedService<CacheMessage>>().First();
@@ -59,7 +62,9 @@ public class ReplicatedLruCacheTests
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
                 ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
-        services2.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheInstanceId);
+        var mux2 = ConnectionMultiplexer.Connect("localhost:6379");
+        services2.AddSingleton<IConnectionMultiplexer>(mux2);
+        services2.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName);
 
         _serviceProvider2 = services2.BuildServiceProvider();
         _service2 = _serviceProvider2.GetServices<IHostedService>().OfType<MessageSyncHostedService<CacheMessage>>().First();
@@ -76,7 +81,9 @@ public class ReplicatedLruCacheTests
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
                 ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
-        services3.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheInstanceId);
+        var mux3 = ConnectionMultiplexer.Connect("localhost:6379");
+        services3.AddSingleton<IConnectionMultiplexer>(mux3);
+        services3.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName);
 
         _serviceProvider3 = services3.BuildServiceProvider();
         _service3 = _serviceProvider3.GetServices<IHostedService>().OfType<MessageSyncHostedService<CacheMessage>>().First();
@@ -1295,7 +1302,7 @@ public class ReplicatedLruCacheTests
         ILruCache? lruCache2 = null;
         try
         {
-            lruCache2 = _serviceProvider2.GetKeyedService<ILruCache>(CacheInstanceId);
+            lruCache2 = _serviceProvider2.GetKeyedService<ILruCache>(CacheName);
             if (lruCache2 != null)
             {
                 bool hasValue = lruCache2.TryGet(key, out var directValue);

@@ -9,7 +9,7 @@ public class ReplicatedLruCacheTests
     private Mock<ILruCache> _mockLocalCache = null!;
     private Mock<IRedisSyncBus<CacheMessage>> _mockSyncBus = null!;
     private ReplicatedLruCache _lruCache = null!;
-    private const string CacheInstanceId = "test-cache";
+    private const string CacheName = "test-cache";
     private string _appId = null!;
 
     [TestInitialize]
@@ -18,7 +18,7 @@ public class ReplicatedLruCacheTests
         _appId = Guid.NewGuid().ToString();
         _mockLocalCache = new Mock<ILruCache>();
         _mockSyncBus = new Mock<IRedisSyncBus<CacheMessage>>();
-        _lruCache = new ReplicatedLruCache(_mockLocalCache.Object, _mockSyncBus.Object, CacheInstanceId);
+        _lruCache = new ReplicatedLruCache(_mockLocalCache.Object, _mockSyncBus.Object, CacheName);
     }
 
     [TestMethod]
@@ -36,7 +36,7 @@ public class ReplicatedLruCacheTests
         _mockLocalCache.Verify(c => c.Set(key, value, ttl), Times.Once);
         _mockSyncBus.Verify(s => s.PublishAsync(It.Is<CacheMessage>(m =>
 
-            m.CacheInstanceId == CacheInstanceId &&
+            m.CacheName == CacheName &&
             m.Operation == CacheOperation.Set &&
             m.Key == key &&
             m.Value == value &&
@@ -57,7 +57,7 @@ public class ReplicatedLruCacheTests
         _mockLocalCache.Verify(c => c.Set(key, value, null), Times.Once);
         _mockSyncBus.Verify(s => s.PublishAsync(It.Is<CacheMessage>(m =>
 
-            m.CacheInstanceId == CacheInstanceId &&
+            m.CacheName == CacheName &&
             m.Operation == CacheOperation.Set &&
             m.Key == key &&
             m.Value == value &&
@@ -111,7 +111,7 @@ public class ReplicatedLruCacheTests
         _mockLocalCache.Verify(c => c.Remove(key), Times.Once);
         _mockSyncBus.Verify(s => s.PublishAsync(It.Is<CacheMessage>(m =>
 
-            m.CacheInstanceId == CacheInstanceId &&
+            m.CacheName == CacheName &&
             m.Operation == CacheOperation.Remove &&
             m.Key == key)), Times.Once);
     }
@@ -126,7 +126,7 @@ public class ReplicatedLruCacheTests
         _mockLocalCache.Verify(c => c.Clear(), Times.Once);
         _mockSyncBus.Verify(s => s.PublishAsync(It.Is<CacheMessage>(m =>
 
-            m.CacheInstanceId == CacheInstanceId &&
+            m.CacheName == CacheName &&
             m.Operation == CacheOperation.Clear)), Times.Once);
     }
 

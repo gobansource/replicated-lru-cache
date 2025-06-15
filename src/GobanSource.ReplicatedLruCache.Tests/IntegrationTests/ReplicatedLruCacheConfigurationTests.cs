@@ -3,13 +3,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using StackExchange.Redis;
 
 namespace GobanSource.ReplicatedLruCache.Tests.IntegrationTests;
 
 [TestClass]
 public class ReplicatedLruCacheConfigurationTests
 {
-    private const string CacheInstanceId = "test-cache";
+    private const string CacheName = "test-cache";
     private const int CacheSize = 100;
     private const string AppId = "test-app";
     private const string ChannelPrefix = "test-channel";
@@ -25,13 +26,14 @@ public class ReplicatedLruCacheConfigurationTests
         .AddInMemoryCollection(new Dictionary<string, string?>())
         .Build();
         services.AddSingleton<IConfiguration>(configuration);
+        var mux = ConnectionMultiplexer.Connect("localhost:6379");
+        services.AddSingleton<IConnectionMultiplexer>(mux);
 
         // Act
-        services.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheInstanceId, options =>
+        services.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName, options =>
         {
             options.AppId = AppId;
             options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
-            options.RedisSyncBus.ConnectionString = RedisConnection;
         });
 
 
@@ -64,12 +66,14 @@ public class ReplicatedLruCacheConfigurationTests
             .Build();
 
         services.AddSingleton<IConfiguration>(configuration);
+        var mux = ConnectionMultiplexer.Connect("localhost:6379");
+        services.AddSingleton<IConnectionMultiplexer>(mux);
 
         // Configure options from configuration file
         services.Configure<ReplicatedLruCacheOptions>(configuration.GetSection("ReplicatedLruCache"));
 
         // Act
-        services.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheInstanceId);
+        services.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName);
 
 
         var serviceProvider = services.BuildServiceProvider();
@@ -101,6 +105,8 @@ public class ReplicatedLruCacheConfigurationTests
             .Build();
 
         services.AddSingleton<IConfiguration>(configuration);
+        var mux = ConnectionMultiplexer.Connect("localhost:6379");
+        services.AddSingleton<IConnectionMultiplexer>(mux);
 
         // Configure options from configuration file
         services.Configure<ReplicatedLruCacheOptions>(configuration.GetSection("ReplicatedLruCache"));
@@ -108,7 +114,7 @@ public class ReplicatedLruCacheConfigurationTests
         var customAppId = "custom-app-id";
 
         // Act
-        services.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheInstanceId, options =>
+        services.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName, options =>
         {
             options.AppId = customAppId; // Override AppId from config file
             // Let other settings come from config file
@@ -151,33 +157,18 @@ public class ReplicatedLruCacheConfigurationTests
             .AddInMemoryCollection(new Dictionary<string, string?>())
             .Build();
             services2.AddSingleton<IConfiguration>(configuration);
+            var mux = ConnectionMultiplexer.Connect("localhost:6379");
+            services2.AddSingleton<IConnectionMultiplexer>(mux);
 
-            services2.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheInstanceId, options =>
+            services2.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName, options =>
             {
                 // AppId is missing
                 options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
-                options.RedisSyncBus.ConnectionString = RedisConnection;
             });
             services2.BuildServiceProvider().GetRequiredService<IReplicatedLruCache>();
         });
 
-        // Act & Assert - Missing Redis connection string
-        Assert.ThrowsException<ArgumentException>(() =>
-        {
-            var services3 = new ServiceCollection();
-            services3.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
-            var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>())
-            .Build();
-            services3.AddSingleton<IConfiguration>(configuration);
 
-            services3.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheInstanceId, options =>
-            {
-                options.AppId = AppId;
-                options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
-            });
-            services3.BuildServiceProvider().GetRequiredService<IRedisSyncBus<CacheMessage>>();
-        });
     }
 
     [TestMethod]
@@ -190,11 +181,10 @@ public class ReplicatedLruCacheConfigurationTests
         // Act & Assert
         Assert.ThrowsException<ArgumentException>(() =>
         {
-            services.AddReplicatedLruCache<IReplicatedLruCache>(0, CacheInstanceId, options =>
+            services.AddReplicatedLruCache<IReplicatedLruCache>(0, CacheName, options =>
             {
                 options.AppId = AppId;
                 options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
-                options.RedisSyncBus.ConnectionString = RedisConnection;
             });
         });
     }
@@ -209,11 +199,10 @@ public class ReplicatedLruCacheConfigurationTests
         // Act & Assert
         Assert.ThrowsException<ArgumentException>(() =>
         {
-            services.AddReplicatedLruCache<IReplicatedLruCache>(-1, CacheInstanceId, options =>
+            services.AddReplicatedLruCache<IReplicatedLruCache>(-1, CacheName, options =>
             {
                 options.AppId = AppId;
                 options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
-                options.RedisSyncBus.ConnectionString = RedisConnection;
             });
         });
     }

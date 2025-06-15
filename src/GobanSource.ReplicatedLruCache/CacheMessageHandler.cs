@@ -22,14 +22,14 @@ public class CacheMessageHandler : IMessageHandler<CacheMessage>
     /// <inheritdoc />
     public async Task HandleAsync(CacheMessage message)
     {
-        Console.WriteLine($"[DEBUG] CacheMessageHandler processing message: Op={message.Operation}, Key={message.Key}, CacheId={message.CacheInstanceId}");
+        Console.WriteLine($"[DEBUG] CacheMessageHandler processing message: Op={message.Operation}, Key={message.Key}, CacheName={message.CacheName}");
 
-        var cache = _serviceProvider.GetKeyedService<ILruCache>(message.CacheInstanceId);
+        var cache = _serviceProvider.GetKeyedService<ILruCache>(message.CacheName);
 
         if (cache == null)
         {
-            Console.WriteLine($"[DEBUG] Cache not found for instance: {message.CacheInstanceId}");
-            _logger.LogWarning("Cache not found for instance: {CacheInstanceId}", message.CacheInstanceId);
+            Console.WriteLine($"[DEBUG] Cache not found for instance: {message.CacheName}");
+            _logger.LogWarning("Cache not found for instance: {CacheName}", message.CacheName);
             return;
         }
 
@@ -40,17 +40,17 @@ public class CacheMessageHandler : IMessageHandler<CacheMessage>
                 case CacheOperation.Set:
                     Console.WriteLine($"[DEBUG] Setting cache: Key={message.Key}, Value={message.Value}");
                     cache.Set(message.Key, message.Value, message.TTL);
-                    _logger.LogDebug("Set {Key} in cache {CacheInstanceId}", message.Key, message.CacheInstanceId);
+                    _logger.LogDebug("Set {Key} in cache {CacheName}", message.Key, message.CacheName);
                     break;
                 case CacheOperation.Remove:
                     Console.WriteLine($"[DEBUG] Removing from cache: Key={message.Key}");
                     cache.Remove(message.Key);
-                    _logger.LogDebug("Removed {Key} from cache {CacheInstanceId}", message.Key, message.CacheInstanceId);
+                    _logger.LogDebug("Removed {Key} from cache {CacheName}", message.Key, message.CacheName);
                     break;
                 case CacheOperation.Clear:
                     Console.WriteLine($"[DEBUG] Clearing cache");
                     cache.Clear();
-                    _logger.LogDebug("Cleared cache {CacheInstanceId}", message.CacheInstanceId);
+                    _logger.LogDebug("Cleared cache {CacheName}", message.CacheName);
                     break;
                 default:
                     Console.WriteLine($"[DEBUG] Unknown cache operation: {message.Operation}");

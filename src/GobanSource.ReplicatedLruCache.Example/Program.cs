@@ -16,14 +16,14 @@ class Program
             return;
         }
 
-        var instanceId = args[0];
-        Console.WriteLine($"Starting cache instance: {instanceId}");
+        var cacheName = args[0];
+        Console.WriteLine($"Starting cache instance: {cacheName}");
 
-        var host = CreateHostBuilder(instanceId).Build();
+        var host = CreateHostBuilder(cacheName).Build();
         await host.RunAsync();
     }
 
-    static IHostBuilder CreateHostBuilder(string instanceId) =>
+    static IHostBuilder CreateHostBuilder(string cacheName) =>
         Host.CreateDefaultBuilder()
             .ConfigureServices((hostContext, services) =>
             {
@@ -33,7 +33,7 @@ class Program
 
                 services.AddReplicatedLruCache<IReplicatedLruCache>(
                     maxSize: 1000,
-                    cacheInstanceId: instanceId,
+                    cacheName: cacheName,
                     connectionMultiplexer: redis,
                     configureOptions: options =>
                     {
@@ -43,23 +43,23 @@ class Program
 
                 // Add our interactive console service
                 services.AddHostedService<InteractiveConsoleService>();
-                services.AddSingleton<string>(instanceId); // Pass instance ID to the service
+                services.AddSingleton<string>(cacheName); // Pass instance ID to the service
             });
 }
 
 public class InteractiveConsoleService : BackgroundService
 {
     private readonly IReplicatedLruCache _cache;
-    private readonly string _instanceId;
+    private readonly string _cacheName;
     private readonly IHostApplicationLifetime _hostLifetime;
 
     public InteractiveConsoleService(
         IReplicatedLruCache cache,
-        string instanceId,
+        string cacheName,
         IHostApplicationLifetime hostLifetime)
     {
         _cache = cache;
-        _instanceId = instanceId;
+        _cacheName = cacheName;
         _hostLifetime = hostLifetime;
     }
 
@@ -68,7 +68,7 @@ public class InteractiveConsoleService : BackgroundService
         // Wait a bit for other services to start
         await Task.Delay(1000, stoppingToken);
 
-        Console.WriteLine($"Instance {_instanceId} is ready and listening for cache updates...");
+        Console.WriteLine($"Instance {_cacheName} is ready and listening for cache updates...");
         Console.WriteLine("Press Ctrl+C to exit\n");
 
         while (!stoppingToken.IsCancellationRequested)
@@ -126,8 +126,8 @@ public class InteractiveConsoleService : BackgroundService
         }
 
         await _cache.Set(key!, value!, ttl);
-        Console.WriteLine($"[{_instanceId}] Value set successfully. Key: {key}, Value: {value}, TTL: {ttl?.TotalSeconds ?? 0}s");
-        Console.WriteLine($"[{_instanceId}] This should now be replicated to other instances!");
+        Console.WriteLine($"[{_cacheName}] Value set successfully. Key: {key}, Value: {value}, TTL: {ttl?.TotalSeconds ?? 0}s");
+        Console.WriteLine($"[{_cacheName}] This should now be replicated to other instances!");
     }
 
     private void HandleGet()
@@ -137,11 +137,11 @@ public class InteractiveConsoleService : BackgroundService
 
         if (_cache.TryGet(key!, out var value))
         {
-            Console.WriteLine($"[{_instanceId}] Value: {value}");
+            Console.WriteLine($"[{_cacheName}] Value: {value}");
         }
         else
         {
-            Console.WriteLine($"[{_instanceId}] Key not found.");
+            Console.WriteLine($"[{_cacheName}] Key not found.");
         }
     }
 
@@ -151,14 +151,14 @@ public class InteractiveConsoleService : BackgroundService
         var key = Console.ReadLine();
 
         await _cache.Remove(key!);
-        Console.WriteLine($"[{_instanceId}] Key {key} removed successfully.");
-        Console.WriteLine($"[{_instanceId}] This removal should be replicated to other instances!");
+        Console.WriteLine($"[{_cacheName}] Key {key} removed successfully.");
+        Console.WriteLine($"[{_cacheName}] This removal should be replicated to other instances!");
     }
 
     private async Task HandleClear(CancellationToken cancellationToken)
     {
         await _cache.Clear();
-        Console.WriteLine($"[{_instanceId}] Cache cleared successfully.");
-        Console.WriteLine($"[{_instanceId}] This clear should be replicated to other instances!");
+        Console.WriteLine($"[{_cacheName}] Cache cleared successfully.");
+        Console.WriteLine($"[{_cacheName}] This clear should be replicated to other instances!");
     }
 }

@@ -9,7 +9,7 @@ namespace GobanSource.ReplicatedLruCache.Tests.UnitTests;
 [TestClass]
 public class MessageSyncHostedServiceTests
 {
-    private const string TestCacheInstanceId = "test-cache";
+    private const string TestCacheName = "test-cache";
     private Mock<IRedisSyncBus<CacheMessage>> _mockSyncBus = null!;
     private Mock<IMessageHandler<CacheMessage>> _mockHandler = null!;
     private Mock<ILogger<MessageSyncHostedService<CacheMessage>>> _mockLogger = null!;
@@ -77,7 +77,7 @@ public class MessageSyncHostedServiceTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue",
@@ -128,7 +128,7 @@ public class MessageSyncHostedServiceTests
 
         var message = new CacheMessage
         {
-            CacheInstanceId = TestCacheInstanceId,
+            CacheName = TestCacheName,
             Operation = CacheOperation.Set,
             Key = "testKey",
             Value = "testValue"
@@ -172,7 +172,7 @@ public class MessageSyncHostedServiceTests
             ""AppId"": ""test-app"",
             ""InstanceId"": ""test-instance"",
             ""Timestamp"": ""2023-01-01T12:00:00Z"",
-            ""CacheInstanceId"": ""test-cache"",
+            ""CacheName"": ""test-cache"",
             ""Operation"": 0,
             ""Key"": ""test-key"",
             ""Value"": ""test-value"",
@@ -188,7 +188,7 @@ public class MessageSyncHostedServiceTests
         Assert.AreEqual("test-id", (result as BaseMessage)?.MessageId);
         Assert.AreEqual("test-app", (result as BaseMessage)?.AppId);
         Assert.AreEqual("test-instance", (result as BaseMessage)?.InstanceId);
-        Assert.AreEqual("test-cache", cacheMessage.CacheInstanceId);
+        Assert.AreEqual("test-cache", cacheMessage.CacheName);
         Assert.AreEqual(CacheOperation.Set, cacheMessage.Operation);
         Assert.AreEqual("test-key", cacheMessage.Key);
         Assert.AreEqual("test-value", cacheMessage.Value);
@@ -270,7 +270,7 @@ public class MessageSyncHostedServiceTests
             ""AppId"": ""test-app"",
             ""InstanceId"": ""test-instance"",
             ""Timestamp"": ""2023-01-01T12:00:00Z"",
-            ""CacheInstanceId"": ""test-cache"",
+            ""CacheName"": ""test-cache"",
             ""Operation"": 0,
             ""Key"": ""test-key"",
             ""Value"": ""test-value"",
@@ -287,7 +287,7 @@ public class MessageSyncHostedServiceTests
 
         // Assert - Verify the handler was called with the deserialized message
         _mockHandler.Verify(h => h.HandleAsync(It.Is<CacheMessage>(m =>
-            m.CacheInstanceId == "test-cache" &&
+            m.CacheName == "test-cache" &&
             m.Key == "test-key" &&
             m.Value == "test-value" &&
             m.Operation == CacheOperation.Set &&

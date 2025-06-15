@@ -5,19 +5,19 @@ namespace GobanSource.ReplicatedLruCache;
 
 public class ReplicatedLruCache : IReplicatedLruCache
 {
-    private readonly string _cacheInstanceId;
+    private readonly string _cacheName;
     private readonly ILruCache _localCache;
     private readonly IRedisSyncBus<CacheMessage> _syncBus;
 
     public ReplicatedLruCache(
         ILruCache localCache,
         IRedisSyncBus<CacheMessage> syncBus,
-        string cacheInstanceId
+        string cacheName
         )
     {
         _localCache = localCache;
         _syncBus = syncBus;
-        _cacheInstanceId = cacheInstanceId;
+        _cacheName = cacheName;
     }
 
     public async Task Set(string key, string? value, TimeSpan? ttl = null)
@@ -25,7 +25,7 @@ public class ReplicatedLruCache : IReplicatedLruCache
         _localCache.Set(key, value, ttl);
         await _syncBus.PublishAsync(new CacheMessage
         {
-            CacheInstanceId = _cacheInstanceId,
+            CacheName = _cacheName,
             Operation = CacheOperation.Set,
             Key = key,
             Value = value,
@@ -41,7 +41,7 @@ public class ReplicatedLruCache : IReplicatedLruCache
         _localCache.Remove(key);
         await _syncBus.PublishAsync(new CacheMessage
         {
-            CacheInstanceId = _cacheInstanceId,
+            CacheName = _cacheName,
             Operation = CacheOperation.Remove,
             Key = key
         });
@@ -52,7 +52,7 @@ public class ReplicatedLruCache : IReplicatedLruCache
         _localCache.Clear();
         await _syncBus.PublishAsync(new CacheMessage
         {
-            CacheInstanceId = _cacheInstanceId,
+            CacheName = _cacheName,
             Operation = CacheOperation.Clear
         });
     }
