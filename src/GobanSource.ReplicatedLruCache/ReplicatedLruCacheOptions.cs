@@ -1,10 +1,8 @@
 using System;
+using GobanSource.Bus.Redis;
+
 namespace GobanSource.ReplicatedLruCache;
 
-public class RedisSyncBusOptions
-{
-    public string ChannelPrefix { get; set; } = null!;
-}
 
 public class ReplicatedLruCacheOptions
 {
