@@ -72,7 +72,8 @@ public static class RedisSyncBusFactory
         return new RedisSyncBus<CacheMessage>(
             redis,
             channelPrefix,
-            NullLogger<RedisSyncBus<CacheMessage>>.Instance
+            NullLogger<RedisSyncBus<CacheMessage>>.Instance,
+            enableCompression: true
         );
     }
 }

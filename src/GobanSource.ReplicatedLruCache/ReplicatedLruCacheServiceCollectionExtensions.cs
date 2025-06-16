@@ -69,7 +69,8 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
             return new RedisSyncBus<CacheMessage>(
                 redis,
                 options.RedisSyncBus.ChannelPrefix,
-                sp.GetRequiredService<ILogger<RedisSyncBus<CacheMessage>>>()
+                sp.GetRequiredService<ILogger<RedisSyncBus<CacheMessage>>>(),
+                enableCompression: true
             );
         });
 
