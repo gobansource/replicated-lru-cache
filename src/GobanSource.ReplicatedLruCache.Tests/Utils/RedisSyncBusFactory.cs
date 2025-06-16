@@ -54,25 +54,23 @@ public static class RedisSyncBusFactory
             .Returns(Task.FromResult(1L));
     }
 
-    public static IRedisSyncBus<CacheMessage> CreateForTest(string appId, string channelPrefix = "cache-sync")
+    public static IRedisSyncBus<CacheMessage> CreateForTest(string channelPrefix = "cache-sync")
     {
         var loggerMock = new Mock<ILogger<RedisSyncBus<CacheMessage>>>();
         return new RedisSyncBus<CacheMessage>(
             _redisMock.Object,
-            appId,
             channelPrefix,
             loggerMock.Object);
     }
 
     //Create For Integration Tests
-    public static IRedisSyncBus<CacheMessage> CreateForIntegrationTest(string appId, string channelPrefix)
+    public static IRedisSyncBus<CacheMessage> CreateForIntegrationTest(string channelPrefix)
     {
         // Initialize Redis connection
         var redis = ConnectionMultiplexer.Connect("localhost:6379");
 
         return new RedisSyncBus<CacheMessage>(
             redis,
-            appId,
             channelPrefix,
             NullLogger<RedisSyncBus<CacheMessage>>.Instance
         );

@@ -24,8 +24,6 @@ public class CacheSyncHostedServiceTests
     [TestInitialize]
     public void Setup()
     {
-        _appId = Guid.NewGuid().ToString();
-
         // Create first instance
         var (service1, serviceProvider1, cache1, syncBus1) =
             CacheSyncHostedServiceFactory.CreateForSociableTest(_appId, TestCacheName);
@@ -58,7 +56,6 @@ public class CacheSyncHostedServiceTests
         // Arrange
         var testMessage = new CacheMessage
         {
-            AppId = _appId,
             CacheName = TestCacheName,
             Operation = CacheOperation.Set,
             Key = "testKey",

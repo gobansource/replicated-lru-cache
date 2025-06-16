@@ -169,7 +169,6 @@ public class MessageSyncHostedServiceTests
         // Create a JSON string representing a CacheMessage
         var jsonMessage = @"{
             ""MessageId"": ""test-id"",
-            ""AppId"": ""test-app"",
             ""InstanceId"": ""test-instance"",
             ""Timestamp"": ""2023-01-01T12:00:00Z"",
             ""CacheName"": ""test-cache"",
@@ -186,7 +185,6 @@ public class MessageSyncHostedServiceTests
         Assert.IsInstanceOfType(result, typeof(CacheMessage));
         var cacheMessage = (CacheMessage)result;
         Assert.AreEqual("test-id", (result as BaseMessage)?.MessageId);
-        Assert.AreEqual("test-app", (result as BaseMessage)?.AppId);
         Assert.AreEqual("test-instance", (result as BaseMessage)?.InstanceId);
         Assert.AreEqual("test-cache", cacheMessage.CacheName);
         Assert.AreEqual(CacheOperation.Set, cacheMessage.Operation);
@@ -235,7 +233,6 @@ public class MessageSyncHostedServiceTests
         // Create JSON with missing required properties
         var incompleteJson = @"{
             ""MessageId"": ""test-id"",
-            ""AppId"": ""test-app""
             // Missing other required properties
         }";
 
@@ -267,7 +264,6 @@ public class MessageSyncHostedServiceTests
         // Create a JSON string representing a CacheMessage
         var jsonMessage = @"{
             ""MessageId"": ""test-id"",
-            ""AppId"": ""test-app"",
             ""InstanceId"": ""test-instance"",
             ""Timestamp"": ""2023-01-01T12:00:00Z"",
             ""CacheName"": ""test-cache"",

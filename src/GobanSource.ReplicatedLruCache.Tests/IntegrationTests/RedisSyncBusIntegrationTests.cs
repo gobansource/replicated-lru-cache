@@ -7,7 +7,6 @@ namespace GobanSource.ReplicatedLruCache.Tests.IntegrationTests;
 public class RedisSyncBusIntegrationTests : IAsyncDisposable
 {
     private IConnectionMultiplexer _redis = null!;
-    private string _appId = null!;
     private string _cacheName = null!;
     private string _channelPrefix = null!;
     private IRedisSyncBus<CacheMessage> _provider = null!;
@@ -15,16 +14,15 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
     [TestInitialize]
     public void Initialize()
     {
-        _appId = $"test-app-{Guid.NewGuid()}";
         _cacheName = $"test-cache-{Guid.NewGuid()}";
-        _channelPrefix = "test-cache-sync";
+        _channelPrefix = $"test-cache-sync-{Guid.NewGuid()}";
 
-        _provider = CreateSyncBus(_appId, _channelPrefix);
+        _provider = CreateSyncBus(_channelPrefix);
     }
 
-    private IRedisSyncBus<CacheMessage> CreateSyncBus(string appId, string channelPrefix)
+    private IRedisSyncBus<CacheMessage> CreateSyncBus(string channelPrefix)
     {
-        return RedisSyncBusFactory.CreateForIntegrationTest(appId, channelPrefix);
+        return RedisSyncBusFactory.CreateForIntegrationTest(channelPrefix);
     }
 
     [TestMethod]
@@ -42,7 +40,6 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
         // Act
         var testMessage = new CacheMessage
         {
-            AppId = _appId,
             CacheName = _cacheName,
             Key = "test-key",
             Value = "test-value",
@@ -69,9 +66,9 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
         var provider1 = _provider; // Use existing provider
 
         // Create second and third providers with same app/cache IDs but different instances
-        var provider2 = CreateSyncBus(_appId, _channelPrefix);
+        var provider2 = CreateSyncBus(_channelPrefix);
 
-        var provider3 = CreateSyncBus(_appId, _channelPrefix);
+        var provider3 = CreateSyncBus(_channelPrefix);
 
         try
         {
@@ -96,7 +93,6 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
             // Act - Send message from third provider
             var testMessage = new CacheMessage
             {
-                AppId = _appId,
                 CacheName = _cacheName,
                 Key = "test-key",
                 Value = "test-value",
@@ -158,9 +154,9 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
         var provider1 = _provider; // Use existing provider
 
         // Create two more providers with same app/cache IDs but different instances
-        var provider2 = RedisSyncBusFactory.CreateForIntegrationTest(_appId, _channelPrefix);
+        var provider2 = RedisSyncBusFactory.CreateForIntegrationTest(_channelPrefix);
 
-        var provider3 = RedisSyncBusFactory.CreateForIntegrationTest(_appId, _channelPrefix);
+        var provider3 = RedisSyncBusFactory.CreateForIntegrationTest(_channelPrefix);
 
         try
         {
@@ -186,7 +182,6 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
             // Act - Send message from third provider
             var testMessage = new CacheMessage
             {
-                AppId = _appId,
                 CacheName = _cacheName,
                 Key = "test-key",
                 Value = "test-value",
@@ -233,7 +228,6 @@ public class RedisSyncBusIntegrationTests : IAsyncDisposable
             // Now test message from second provider
             var testMessage2 = new CacheMessage
             {
-                AppId = _appId,
                 CacheName = _cacheName,
                 Key = "test-key-2",
                 Value = "test-value-2",

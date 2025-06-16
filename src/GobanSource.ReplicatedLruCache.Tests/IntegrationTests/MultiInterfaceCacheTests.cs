@@ -21,15 +21,13 @@ public class MultiInterfaceCacheTests
     private IServiceProvider _serviceProvider2 = null!;
     private IRedisSyncBus<CacheMessage> _syncBus1 = null!;
     private IRedisSyncBus<CacheMessage> _syncBus2 = null!;
-    private string _appId = null!;
     private const int CacheSize = 100;
     private string _channelPrefix = null!;
 
     [TestInitialize]
     public void Setup()
     {
-        _appId = Guid.NewGuid().ToString();
-        _channelPrefix = "test-cache-sync";
+        _channelPrefix = $"test-cache-sync-{Guid.NewGuid()}";
 
         // Create first instance with both caches
         var services1 = new ServiceCollection();
@@ -37,9 +35,7 @@ public class MultiInterfaceCacheTests
         services1.AddSingleton<IConfiguration>(
             new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ReplicatedLruCache:AppId"] = _appId,
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
-                ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
         var mux1 = ConnectionMultiplexer.Connect("localhost:6379");
         services1.AddSingleton<IConnectionMultiplexer>(mux1);
@@ -58,9 +54,7 @@ public class MultiInterfaceCacheTests
         services2.AddSingleton<IConfiguration>(
             new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ReplicatedLruCache:AppId"] = _appId,
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
-                ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
         var mux2 = ConnectionMultiplexer.Connect("localhost:6379");
         services2.AddSingleton<IConnectionMultiplexer>(mux2);
@@ -134,9 +128,7 @@ public class MultiInterfaceCacheTests
         services.AddSingleton<IConfiguration>(
             new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ReplicatedLruCache:AppId"] = _appId,
                 ["ReplicatedLruCache:RedisSyncBus:ChannelPrefix"] = _channelPrefix,
-                ["ReplicatedLruCache:RedisSyncBus:ConnectionString"] = "localhost:6379"
             }).Build());
         var muxExplicit = ConnectionMultiplexer.Connect("localhost:6379");
         services.AddSingleton<IConnectionMultiplexer>(muxExplicit);

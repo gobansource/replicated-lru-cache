@@ -37,7 +37,6 @@ class Program
                     connectionMultiplexer: redis,
                     configureOptions: options =>
                     {
-                        options.AppId = "demo-app";
                         options.RedisSyncBus.ChannelPrefix = "cache-sync";
                     });
 

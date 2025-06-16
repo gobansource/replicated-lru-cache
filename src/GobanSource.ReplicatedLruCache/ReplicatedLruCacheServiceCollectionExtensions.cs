@@ -34,11 +34,6 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
 
         services.AddSingleton<TInterface>(sp =>
         {
-            var options = sp.GetRequiredService<IOptions<ReplicatedLruCacheOptions>>().Value;
-            if (string.IsNullOrEmpty(options.AppId))
-            {
-                throw new ArgumentException("AppId must be configured in ReplicatedLruCacheOptions", nameof(configureOptions));
-            }
             return ReplicatedLruCacheProxy<TInterface>.Create(
                 new ReplicatedLruCache(
                     sp.GetRequiredKeyedService<ILruCache>(actualCacheName),
@@ -69,15 +64,10 @@ public static class ReplicatedLruCacheServiceCollectionExtensions
         services.AddSingleton<IRedisSyncBus<CacheMessage>>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<ReplicatedLruCacheOptions>>().Value;
-            if (string.IsNullOrEmpty(options.AppId))
-            {
-                throw new ArgumentException("AppId must be configured in ReplicatedLruCacheOptions", nameof(configureOptions));
-            }
             var redis = externalMultiplexer ?? sp.GetRequiredService<IConnectionMultiplexer>();
 
             return new RedisSyncBus<CacheMessage>(
                 redis,
-                options.AppId,
                 options.RedisSyncBus.ChannelPrefix,
                 sp.GetRequiredService<ILogger<RedisSyncBus<CacheMessage>>>()
             );

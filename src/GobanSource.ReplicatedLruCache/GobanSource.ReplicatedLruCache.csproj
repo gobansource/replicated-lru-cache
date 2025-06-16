@@ -25,7 +25,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GobanSource.Bus.Redis" Version="1.0.40" />
+    <PackageReference Include="GobanSource.Bus.Redis" Version="1.0.42" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <None Include="../../README.md" Pack="true" PackagePath="/" />

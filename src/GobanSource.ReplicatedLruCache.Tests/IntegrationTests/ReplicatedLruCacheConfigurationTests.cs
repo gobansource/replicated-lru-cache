@@ -32,7 +32,6 @@ public class ReplicatedLruCacheConfigurationTests
         // Act
         services.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName, options =>
         {
-            options.AppId = AppId;
             options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
         });
 
@@ -93,85 +92,6 @@ public class ReplicatedLruCacheConfigurationTests
     }
 
     [TestMethod]
-    public async Task AddReplicatedLruCache_WithMixedConfig_ShouldUseInlineOverFile()
-    {
-        // Arrange
-        var services = new ServiceCollection();
-        services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
-
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.ut.json")
-            .Build();
-
-        services.AddSingleton<IConfiguration>(configuration);
-        var mux = ConnectionMultiplexer.Connect("localhost:6379");
-        services.AddSingleton<IConnectionMultiplexer>(mux);
-
-        // Configure options from configuration file
-        services.Configure<ReplicatedLruCacheOptions>(configuration.GetSection("ReplicatedLruCache"));
-
-        var customAppId = "custom-app-id";
-
-        // Act
-        services.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName, options =>
-        {
-            options.AppId = customAppId; // Override AppId from config file
-            // Let other settings come from config file
-        });
-
-
-
-        var serviceProvider = services.BuildServiceProvider();
-
-        // Assert
-        var cache = serviceProvider.GetRequiredService<IReplicatedLruCache>();
-        Assert.IsNotNull(cache);
-
-        var hostedService = serviceProvider.GetServices<Microsoft.Extensions.Hosting.IHostedService>()
-            .OfType<MessageSyncHostedService<CacheMessage>>()
-            .FirstOrDefault();
-        Assert.IsNotNull(hostedService);
-
-        // Test the cache to verify it's working with the custom AppId
-        var key = "test-key";
-        var value = "test-value";
-        await cache.Set(key, value);
-        Assert.IsTrue(cache.TryGet(key, out var result));
-        Assert.AreEqual(value, result);
-
-        // Cleanup
-        if (serviceProvider is IAsyncDisposable disposable)
-            await disposable.DisposeAsync();
-    }
-
-    [TestMethod]
-    public void AddReplicatedLruCache_WithInvalidConfig_ShouldThrowException()
-    {
-        // Act & Assert - Missing AppId
-        Assert.ThrowsException<ArgumentException>(() =>
-        {
-            var services2 = new ServiceCollection();
-            services2.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
-            var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>())
-            .Build();
-            services2.AddSingleton<IConfiguration>(configuration);
-            var mux = ConnectionMultiplexer.Connect("localhost:6379");
-            services2.AddSingleton<IConnectionMultiplexer>(mux);
-
-            services2.AddReplicatedLruCache<IReplicatedLruCache>(CacheSize, CacheName, options =>
-            {
-                // AppId is missing
-                options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
-            });
-            services2.BuildServiceProvider().GetRequiredService<IReplicatedLruCache>();
-        });
-
-
-    }
-
-    [TestMethod]
     public void AddReplicatedLruCache_WithZeroCacheSize_ShouldThrowException()
     {
         // Arrange
@@ -183,7 +103,6 @@ public class ReplicatedLruCacheConfigurationTests
         {
             services.AddReplicatedLruCache<IReplicatedLruCache>(0, CacheName, options =>
             {
-                options.AppId = AppId;
                 options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
             });
         });
@@ -201,7 +120,6 @@ public class ReplicatedLruCacheConfigurationTests
         {
             services.AddReplicatedLruCache<IReplicatedLruCache>(-1, CacheName, options =>
             {
-                options.AppId = AppId;
                 options.RedisSyncBus.ChannelPrefix = ChannelPrefix;
             });
         });
