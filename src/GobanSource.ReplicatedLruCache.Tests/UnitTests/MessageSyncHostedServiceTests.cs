@@ -35,7 +35,10 @@ public class MessageSyncHostedServiceTests
         await _service.StartAsync(default);
 
         // Assert
-        _mockSyncBus.Verify(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()), Times.Once);
+        _mockSyncBus.Verify(x => x.SubscribeAsync(
+            It.IsAny<Func<CacheMessage, Task>>(),
+            It.IsAny<Func<string, CacheMessage>>(),
+            It.IsAny<CancellationToken>()), Times.Once);
         _mockLogger.Verify(
             x => x.Log(
                 LogLevel.Information,
@@ -53,7 +56,7 @@ public class MessageSyncHostedServiceTests
         await _service.StopAsync(default);
 
         // Assert
-        _mockSyncBus.Verify(x => x.UnsubscribeAsync(), Times.Once);
+        _mockSyncBus.Verify(x => x.UnsubscribeAsync(It.IsAny<CancellationToken>()), Times.Once);
         _mockLogger.Verify(
             x => x.Log(
                 LogLevel.Information,
@@ -69,8 +72,11 @@ public class MessageSyncHostedServiceTests
     {
         // Arrange
         Func<CacheMessage, Task>? messageHandler = null;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, _) => messageHandler = handler)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, _, _) => messageHandler = handler)
             .Returns(Task.CompletedTask);
 
         await _service.StartAsync(default);
@@ -120,8 +126,11 @@ public class MessageSyncHostedServiceTests
     {
         // Arrange
         Func<CacheMessage, Task>? messageHandler = null;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, _) => messageHandler = handler)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, _, _) => messageHandler = handler)
             .Returns(Task.CompletedTask);
 
         await _service.StartAsync(default);
@@ -156,8 +165,11 @@ public class MessageSyncHostedServiceTests
     {
         // Arrange
         Func<string, IMessage>? deserializer = null;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((_, deserializeFunc) => deserializer = deserializeFunc)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((_, deserializeFunc, _) => deserializer = deserializeFunc)
             .Returns(Task.CompletedTask);
 
         // Start the service which will set up the deserializer
@@ -198,8 +210,11 @@ public class MessageSyncHostedServiceTests
     {
         // Arrange
         Func<string, CacheMessage>? deserializer = null;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((_, deserializeFunc) => deserializer = deserializeFunc)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((_, deserializeFunc, _) => deserializer = deserializeFunc)
             .Returns(Task.CompletedTask);
 
         // Start the service which will set up the deserializer
@@ -220,8 +235,11 @@ public class MessageSyncHostedServiceTests
     {
         // Arrange
         Func<string, CacheMessage>? deserializer = null;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((_, deserializeFunc) => deserializer = deserializeFunc)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((_, deserializeFunc, _) => deserializer = deserializeFunc)
             .Returns(Task.CompletedTask);
 
         // Start the service which will set up the deserializer
@@ -247,8 +265,11 @@ public class MessageSyncHostedServiceTests
         Func<CacheMessage, Task>? messageHandler = null;
         Func<string, CacheMessage>? deserializer = null;
 
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, deserializeFunc) =>
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, deserializeFunc, _) =>
             {
                 messageHandler = handler;
                 deserializer = deserializeFunc;

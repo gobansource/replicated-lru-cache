@@ -40,7 +40,7 @@ public class ReplicatedLruCacheTests
             m.Operation == CacheOperation.Set &&
             m.Key == key &&
             m.Value == value &&
-            m.TTL == ttl)), Times.Once);
+            m.TTL == ttl), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [TestMethod]
@@ -61,7 +61,7 @@ public class ReplicatedLruCacheTests
             m.Operation == CacheOperation.Set &&
             m.Key == key &&
             m.Value == value &&
-            m.TTL == null)), Times.Once);
+            m.TTL == null), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [TestMethod]
@@ -113,7 +113,7 @@ public class ReplicatedLruCacheTests
 
             m.CacheName == CacheName &&
             m.Operation == CacheOperation.Remove &&
-            m.Key == key)), Times.Once);
+            m.Key == key), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [TestMethod]
@@ -127,7 +127,7 @@ public class ReplicatedLruCacheTests
         _mockSyncBus.Verify(s => s.PublishAsync(It.Is<CacheMessage>(m =>
 
             m.CacheName == CacheName &&
-            m.Operation == CacheOperation.Clear)), Times.Once);
+            m.Operation == CacheOperation.Clear), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [TestMethod]
@@ -136,7 +136,7 @@ public class ReplicatedLruCacheTests
         // Arrange
         var key = "key1";
         var value = "value1";
-        _mockSyncBus.Setup(s => s.PublishAsync(It.IsAny<CacheMessage>()))
+        _mockSyncBus.Setup(s => s.PublishAsync(It.IsAny<CacheMessage>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Publish failed"));
 
         // Act & Assert
@@ -149,7 +149,7 @@ public class ReplicatedLruCacheTests
     {
         // Arrange
         var key = "key1";
-        _mockSyncBus.Setup(s => s.PublishAsync(It.IsAny<CacheMessage>()))
+        _mockSyncBus.Setup(s => s.PublishAsync(It.IsAny<CacheMessage>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Publish failed"));
 
         // Act & Assert
@@ -161,7 +161,7 @@ public class ReplicatedLruCacheTests
     public async Task Clear_WhenPublishFails_ShouldThrowException()
     {
         // Arrange
-        _mockSyncBus.Setup(s => s.PublishAsync(It.IsAny<CacheMessage>()))
+        _mockSyncBus.Setup(s => s.PublishAsync(It.IsAny<CacheMessage>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Publish failed"));
 
         // Act & Assert

@@ -31,7 +31,7 @@ public class CacheSyncHostedServiceTests
         await _service.StartAsync(default);
 
         // Assert
-        _mockSyncBus.Verify(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()), Times.Once);
+        _mockSyncBus.Verify(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [TestMethod]
@@ -41,7 +41,7 @@ public class CacheSyncHostedServiceTests
         await _service.StopAsync(default);
 
         // Assert
-        _mockSyncBus.Verify(x => x.UnsubscribeAsync(), Times.Once);
+        _mockSyncBus.Verify(x => x.UnsubscribeAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [TestMethod]
@@ -49,8 +49,11 @@ public class CacheSyncHostedServiceTests
     {
         // Arrange
         Func<CacheMessage, Task> messageHandler = null!;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, _) => messageHandler = handler)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, _, _) => messageHandler = handler)
             .Returns(Task.CompletedTask);
 
         await _service.StartAsync(default);
@@ -83,8 +86,11 @@ public class CacheSyncHostedServiceTests
     {
         // Arrange
         Func<CacheMessage, Task> messageHandler = null!;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, _) => messageHandler = handler)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, _, _) => messageHandler = handler)
             .Returns(Task.CompletedTask);
 
         await _service.StartAsync(default);
@@ -115,8 +121,11 @@ public class CacheSyncHostedServiceTests
     {
         // Arrange
         Func<CacheMessage, Task> messageHandler = null!;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, _) => messageHandler = handler)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, _, _) => messageHandler = handler)
             .Returns(Task.CompletedTask);
 
         await _service.StartAsync(default);
@@ -146,8 +155,11 @@ public class CacheSyncHostedServiceTests
     {
         // Arrange
         Func<CacheMessage, Task> messageHandler = null!;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, _) => messageHandler = handler)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, _, _) => messageHandler = handler)
             .Returns(Task.CompletedTask);
 
         // _mockServiceProvider.Setup(sp => sp.GetService(typeof(ILruCache)))
@@ -181,8 +193,11 @@ public class CacheSyncHostedServiceTests
     {
         // Arrange
         Func<CacheMessage, Task> messageHandler = null!;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, _) => messageHandler = handler)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, _, _) => messageHandler = handler)
             .Returns(Task.CompletedTask);
 
         await _service.StartAsync(default);
@@ -216,8 +231,11 @@ public class CacheSyncHostedServiceTests
     {
         // Arrange
         Func<CacheMessage, Task> messageHandler = null!;
-        _mockSyncBus.Setup(x => x.SubscribeAsync(It.IsAny<Func<CacheMessage, Task>>(), It.IsAny<Func<string, CacheMessage>>()))
-            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>>((handler, _) => messageHandler = handler)
+        _mockSyncBus.Setup(x => x.SubscribeAsync(
+                It.IsAny<Func<CacheMessage, Task>>(),
+                It.IsAny<Func<string, CacheMessage>>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<Func<CacheMessage, Task>, Func<string, CacheMessage>, CancellationToken>((handler, _, _) => messageHandler = handler)
             .Returns(Task.CompletedTask);
 
         _mockCache.Setup(c => c.Set(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan?>()))
